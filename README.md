@@ -1,85 +1,49 @@
-# op-node
+<div align="center">
+  <br />
+  <br />
+  <a href="https://kroma.network"><img alt="Kroma" src="https://github.com/kroma-network/kroma-brand-kit/raw/main/assets/images/signature/Kroma-signature.svg" width=500></a>
+  <br />
+  <h3><a href="https://kroma.network">Kroma</a> aims to be a New Universal ZK Rollup on Ethereum.</h3>
+  <br />
+</div>
 
-This is the reference implementation of the [rollup-node spec](https://github.com/kroma-network/kroma-specs/blob/main/specs/protocol/rollup-node.md).
+## About Kroma
 
-## Compiling
+Kroma is the first universal stage 2 Layer 2 (L2) on Ethereum. Kroma has been developed based on Optimism Bedrock
+architecture, and aims to be a universal ZK rollup. Currently, Kroma operates as an Optimistic rollup with ZK fault
+proofs, utilizing a zkEVM based on Scroll. The goal of Kroma is to eventually transition to a ZK rollup once the
+generation of ZK proofs becomes more cost-efficient and faster.
 
-Compile a binary:
-```shell
-cd op-node
-go build -o bin/op-node ./cmd
-```
+Kroma offers lower transactions fees compared to the Ethereum mainnet, with native Ethereum security and EVM
+equivalence. Our roadmap to transition from Optimistic rollup to ZK rollup sets Kroma apart from other L2 networks.
+Additionally, Kroma is advancing towards decentralization. As an initial step for this, Kroma has introduced a
+permissionless validator and challenge system.
 
-## Testing
+For more detailed information about Kroma, check [Kroma docs](https://docs.kroma.network) (or
+[spec docs](https://specs.kroma.network)).
 
-Run op-node unit tests:
-```shell
-cd op-node
-go test ./...
-```
+## Links
 
-Run end-to-end tests:
-```shell
-cd op-e2e
-go test ./...
-```
+- Official Website: [Kroma](https://kroma.network)
+- Documentation: [Kroma Docs](https://docs.kroma.network)
+- Specs: [Kroma Specs](https://specs.kroma.network)
+- Blog: [Kroma Medium](https://medium.com/@kroma-network)
+- Discord: [Kroma Discord](https://discord.gg/kroma)
+- X (Twitter): [Kroma X](https://twitter.com/kroma_network)
 
-## Running
+## Contributing
 
-Options can be reviewed with:
+Read through [CONTRIBUTING.md](./CONTRIBUTING.md) for a general overview of our contribution process.
+Use the [Developer Quick Start](./CONTRIBUTING.md#development-quick-start) to get your development environment set up to
+start working on the Kroma repository.
+Then check out our list of [Good First Issues](https://github.com/kroma-network/kroma/contribute) to find something fun
+to work on!
 
-```shell
-./bin/op-node --help
-```
+## Security Policy
 
-To start syncing the rollup:
+Please refer to the canonical [Security Policy](https://github.com/kroma-network/.github/blob/main/SECURITY.md) document
+for detailed information about how to report vulnerabilities in this codebase.
 
-Connect to at least one L1 RPC and L2 execution engine:
+## License
 
-- L1: use any L1 node / RPC (websocket connection path may differ)
-- L2: run the Kroma fork of op-geth: [`kroma-geth`](https://github.com/kroma-network/go-ethereum)
-
-```shell
-# websockets or IPC preferred for event notifications to improve sync, http RPC works with adaptive polling.
-op \
-  --l1=ws://localhost:8546 --l2=ws//localhost:9001 \
-  --rollup.config=./path-to-network-config/rollup.json \
-  --rpc.addr=127.0.0.1 \
-  --rpc.port=7000
-```
-
-## Devnet Genesis Generation
-
-The `op-node` can generate geth compatible `genesis.json` files. These files
-can be used with `geth init` to initialize the `StateDB` with accounts, storage,
-code and balances. The L2 state must be initialized with predeploy contracts
-that exist in the state and act as system level contracts. The `op-node` can
-generate a genesis file with these predeploys configured correctly given
-hardhat compilation artifacts, hardhat deployment artifacts, a L1 RPC URL
-and a deployment config.
-
-The hardhat compilation artifacts are produced by `hardhat compile`. The native
-hardhat compiler toolchain produces them by default and the
-`@foundry-rs/hardhat` plugin can also produce them when using the foundry
-compiler toolchain. They can usually be found in an `artifacts` directory.
-
-The hardhat deployment artifacts are produced by running `hardhat deploy`. These
-exist to make it easy to track deployments of smart contract systems over time.
-They can usually be found in a `deployments` directory.
-
-The deployment config contains all of the information required to deploy the
-system. It can be found in `packages/contracts/deploy-config`. Each
-deploy config file can be JSON or TypeScript, although only JSON files are
-supported by the `op-node`. The network name must match the name of the file
-in the deploy config directory.
-
-Example usage:
-
-```bash
-$ op-node genesis devnet-l2 \
-   --artifacts $CONTRACTS/artifacts \
-   --network $NETWORK \
-   --deployments $CONTRACTS/deployments \
-   --deploy-config $CONTRACTS/deploy-config \
-   --rpc-url http://localhost:8545
-```
+All files within this repository are licensed under the [MIT License](./LICENSE) unless stated otherwise.
