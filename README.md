@@ -1,40 +1,85 @@
-# op-bindings
+# op-node
 
-This package contains built go bindings of the smart contracts. It must be
-updated after any changes to the smart contracts to ensure that the bindings are
-up to date.
+This is the reference implementation of the [rollup-node spec](https://github.com/kroma-network/kroma-specs/blob/main/specs/protocol/rollup-node.md).
 
-The bindings include the bytecode for each contract so that go based tests
-can deploy the contracts. There are also `more` files that include the deployed
-bytecode as well as the storage layout. These are used to dynamically set
-bytecode and storage slots in state.
+## Compiling
 
-## Usage
-
-```bash
-make
+Compile a binary:
+```shell
+cd op-node
+go build -o bin/op-node ./cmd
 ```
 
-## Dependencies
+## Testing
 
-- `abigen` version 1.10.25
-- `make`
-
-To check the version of `abigen`, run the command `abigen --version`.
-
-## abigen
-
-The `abigen` tool is part of `go-ethereum` and can be used to build go bindings
-for smart contracts. It can be installed with go using the commands:
-
-```bash
-$ go get -u github.com/ethereum/go-ethereum
-$ cd $GOPATH/src/github.com/ethereum/go-ethereum/
-$ make devtools
+Run op-node unit tests:
+```shell
+cd op-node
+go test ./...
 ```
 
-The geth docs for `abigen` can be found [here](https://geth.ethereum.org/docs/dapp/native-bindings).
+Run end-to-end tests:
+```shell
+cd op-e2e
+go test ./...
+```
 
-## See also
+## Running
 
-TypeScript bindings are also generated in [@eth-optimism/contracts-ts](../packages/contracts-ts/)
+Options can be reviewed with:
+
+```shell
+./bin/op-node --help
+```
+
+To start syncing the rollup:
+
+Connect to at least one L1 RPC and L2 execution engine:
+
+- L1: use any L1 node / RPC (websocket connection path may differ)
+- L2: run the Kroma fork of op-geth: [`kroma-geth`](https://github.com/kroma-network/go-ethereum)
+
+```shell
+# websockets or IPC preferred for event notifications to improve sync, http RPC works with adaptive polling.
+op \
+  --l1=ws://localhost:8546 --l2=ws//localhost:9001 \
+  --rollup.config=./path-to-network-config/rollup.json \
+  --rpc.addr=127.0.0.1 \
+  --rpc.port=7000
+```
+
+## Devnet Genesis Generation
+
+The `op-node` can generate geth compatible `genesis.json` files. These files
+can be used with `geth init` to initialize the `StateDB` with accounts, storage,
+code and balances. The L2 state must be initialized with predeploy contracts
+that exist in the state and act as system level contracts. The `op-node` can
+generate a genesis file with these predeploys configured correctly given
+hardhat compilation artifacts, hardhat deployment artifacts, a L1 RPC URL
+and a deployment config.
+
+The hardhat compilation artifacts are produced by `hardhat compile`. The native
+hardhat compiler toolchain produces them by default and the
+`@foundry-rs/hardhat` plugin can also produce them when using the foundry
+compiler toolchain. They can usually be found in an `artifacts` directory.
+
+The hardhat deployment artifacts are produced by running `hardhat deploy`. These
+exist to make it easy to track deployments of smart contract systems over time.
+They can usually be found in a `deployments` directory.
+
+The deployment config contains all of the information required to deploy the
+system. It can be found in `packages/contracts/deploy-config`. Each
+deploy config file can be JSON or TypeScript, although only JSON files are
+supported by the `op-node`. The network name must match the name of the file
+in the deploy config directory.
+
+Example usage:
+
+```bash
+$ op-node genesis devnet-l2 \
+   --artifacts $CONTRACTS/artifacts \
+   --network $NETWORK \
+   --deployments $CONTRACTS/deployments \
+   --deploy-config $CONTRACTS/deploy-config \
+   --rpc-url http://localhost:8545
+```
